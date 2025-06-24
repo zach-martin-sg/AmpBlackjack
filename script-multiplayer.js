@@ -159,7 +159,10 @@ class MultiplayerBlackjackGame {
             this.gameState = data.gameState;
             this.updateMultiplayerUI();
             this.updateDisplay();
-            this.showControls('gameControls');
+            
+            // Don't automatically show game controls - let updateMultiplayerUI handle it based on turn
+            console.log('Cards dealt, current player:', data.gameState.currentPlayer);
+            console.log('My player ID:', this.playerData.id);
         });
 
         this.socket.on('player_action_taken', (data) => {
@@ -423,18 +426,27 @@ class MultiplayerBlackjackGame {
         // Update game info
         document.getElementById('roundInfo').textContent = `Round ${this.gameState.round}`;
         
-        // Update turn indicator
+        // Update turn indicator and controls
         const currentPlayer = this.gameState.players.find(p => p.id === this.gameState.currentPlayer);
-        if (currentPlayer) {
-            document.getElementById('turnIndicator').textContent = `${currentPlayer.username}'s turn`;
-            
-            // Show/hide game controls based on whose turn it is
-            if (currentPlayer.id === this.playerData.id && this.gameState.gameState === 'playing') {
-                this.showControls('gameControls');
-                this.showMessage('Your turn! Hit or Stand?');
-            } else if (this.gameState.gameState === 'playing') {
+        console.log('Update UI - Current player:', currentPlayer?.username, 'Game state:', this.gameState.gameState);
+        
+        if (this.gameState.gameState === 'playing') {
+            if (currentPlayer) {
+                document.getElementById('turnIndicator').textContent = `${currentPlayer.username}'s turn`;
+                
+                // Show/hide game controls based on whose turn it is
+                if (currentPlayer.id === this.playerData.id) {
+                    console.log('My turn - showing controls');
+                    this.showControls('gameControls');
+                    this.showMessage('Your turn! Hit or Stand?');
+                } else {
+                    console.log('Not my turn - hiding controls');
+                    this.showControls('none');
+                    this.showMessage(`Waiting for ${currentPlayer.username} to play...`);
+                }
+            } else {
+                document.getElementById('turnIndicator').textContent = 'Determining turn...';
                 this.showControls('none');
-                this.showMessage(`Waiting for ${currentPlayer.username} to play...`);
             }
         } else {
             document.getElementById('turnIndicator').textContent = '';

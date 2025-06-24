@@ -42,6 +42,9 @@ class GameTable {
             return false;
         }
         
+        // Host gets turn order 0, others get incremental numbers
+        const turnOrder = (playerId === this.hostId) ? 0 : this.players.size + 1;
+        
         this.players.set(playerId, {
             id: playerId,
             username: playerData.username,
@@ -52,7 +55,7 @@ class GameTable {
             status: 'waiting', // waiting, betting, playing, stand, bust, finished
             isReady: false,
             joinedAt: Date.now(),
-            turnOrder: this.players.size // Order based on join sequence
+            turnOrder: turnOrder // Host first, then join order
         });
         
         return true;
@@ -137,7 +140,7 @@ class GameTable {
 
     allPlayersBetPlaced() {
         for (let player of this.players.values()) {
-            if (player.status === 'betting' && player.currentBet === 0) {
+            if (player.currentBet === 0) {
                 return false;
             }
         }
@@ -163,6 +166,8 @@ class GameTable {
             const player = this.players.get(playerId);
             player.hand.push(this.deck.pop());
             player.score = this.calculateHandValue(player.hand);
+            // Set all players to playing status
+            player.status = 'playing';
         }
         
         // Second card to dealer (visible)
@@ -460,6 +465,8 @@ io.on('connection', (socket) => {
             tablePlayer.currentBet = betAmount;
             tablePlayer.status = 'ready';
             
+            console.log(`Player ${socket.id} placed bet: ${betAmount}`);
+            
             io.to(table.id).emit('bet_placed', {
                 playerId: socket.id,
                 betAmount: betAmount,
@@ -468,10 +475,12 @@ io.on('connection', (socket) => {
 
             // Check if all players have bet
             if (table.allPlayersBetPlaced()) {
+                console.log('All players have bet, dealing cards');
                 table.dealInitialCards();
                 io.to(table.id).emit('cards_dealt', {
                     gameState: table.getGameState()
                 });
+                console.log('Cards dealt, current player:', table.getCurrentPlayer()?.username);
             }
         }
     });
@@ -483,7 +492,12 @@ io.on('connection', (socket) => {
         const table = tables.get(player.tableId);
         const currentPlayer = table.getCurrentPlayer();
         
+        console.log(`Player ${socket.id} (${player.username}) trying action: ${action}`);
+        console.log(`Current player: ${currentPlayer?.username} (${currentPlayer?.id})`);
+        console.log(`Game state: ${table.gameState}`);
+        
         if (!currentPlayer || currentPlayer.id !== socket.id) {
+            console.log(`Rejecting action - not player's turn`);
             socket.emit('error', { message: 'Not your turn!' });
             return;
         }
