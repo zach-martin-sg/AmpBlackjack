@@ -31,10 +31,15 @@ class MultiplayerBlackjackGame {
 
         // Lobby events
         document.getElementById('soloModeBtn').addEventListener('click', () => this.startSoloMode());
-        document.getElementById('joinPublicBtn').addEventListener('click', () => this.joinPublicTable());
+        document.getElementById('browsePublicBtn').addEventListener('click', () => this.showPublicTablesBrowser());
         document.getElementById('createPrivateBtn').addEventListener('click', () => this.createPrivateTable());
         document.getElementById('joinPrivateBtn').addEventListener('click', () => this.joinPrivateTable());
         document.getElementById('copyInviteBtn').addEventListener('click', () => this.copyInviteCode());
+        
+        // Table browser events
+        document.getElementById('refreshTablesBtn').addEventListener('click', () => this.refreshPublicTables());
+        document.getElementById('createNewTableBtn').addEventListener('click', () => this.createNewPublicTable());
+        document.getElementById('backToLobbyBtn').addEventListener('click', () => this.hidePublicTablesBrowser());
 
         // Game controls
         document.getElementById('dealBtn').addEventListener('click', () => this.dealHand());
@@ -172,6 +177,16 @@ class MultiplayerBlackjackGame {
             this.addChatMessage(data.username, data.message);
         });
 
+        this.socket.on('public_tables_list', (tables) => {
+            this.displayPublicTables(tables);
+        });
+
+        this.socket.on('public_tables_updated', (tables) => {
+            if (document.getElementById('publicTablesBrowser').style.display !== 'none') {
+                this.displayPublicTables(tables);
+            }
+        });
+
         this.socket.on('error', (data) => {
             alert(data.message);
         });
@@ -190,11 +205,96 @@ class MultiplayerBlackjackGame {
         this.updateSoloUI();
     }
 
-    joinPublicTable() {
+    showPublicTablesBrowser() {
         if (this.socket && this.socket.connected) {
-            this.socket.emit('join_public_table');
+            document.getElementById('publicTablesBrowser').style.display = 'block';
+            this.refreshPublicTables();
         } else {
             alert('Please make sure the multiplayer server is running!\n\nTo start the server:\n1. Install Node.js\n2. Run: npm install\n3. Run: npm start\n4. Open http://localhost:3000');
+        }
+    }
+
+    hidePublicTablesBrowser() {
+        document.getElementById('publicTablesBrowser').style.display = 'none';
+    }
+
+    refreshPublicTables() {
+        if (this.socket && this.socket.connected) {
+            document.getElementById('tablesList').innerHTML = '<div class="loading-tables">Loading tables...</div>';
+            this.socket.emit('get_public_tables');
+        }
+    }
+
+    createNewPublicTable() {
+        if (this.socket && this.socket.connected) {
+            this.socket.emit('create_new_public_table');
+        }
+    }
+
+    joinSpecificTable(tableId) {
+        if (this.socket && this.socket.connected) {
+            this.socket.emit('join_specific_table', tableId);
+        }
+    }
+
+    displayPublicTables(tables) {
+        const tablesList = document.getElementById('tablesList');
+        
+        if (tables.length === 0) {
+            tablesList.innerHTML = `
+                <div class="no-tables">
+                    <h4>No Public Tables Available</h4>
+                    <p>Be the first to create one!</p>
+                </div>
+            `;
+            return;
+        }
+
+        tablesList.innerHTML = tables.map(table => {
+            const isFull = table.playerCount >= table.maxPlayers;
+            const timeAgo = this.getTimeAgo(table.createdAt);
+            
+            return `
+                <div class="table-item ${isFull ? 'full' : ''}" onclick="game.joinSpecificTable('${table.id}')" ${isFull ? 'title="Table is full"' : ''}>
+                    <div class="table-header">
+                        <span class="table-id">Table ${table.id.slice(-6)}</span>
+                        <span class="table-status ${table.gameState}">${this.formatGameState(table.gameState)}</span>
+                    </div>
+                    <div class="table-info">
+                        <div class="table-players">
+                            <span class="player-count">${table.playerCount}/${table.maxPlayers} players</span>
+                            ${table.players.map(p => `<span title="${p.status}">${p.username}</span>`).join(', ')}
+                        </div>
+                        <div class="table-round">
+                            ${table.round > 0 ? `Round ${table.round}` : 'New'} • ${timeAgo}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    formatGameState(state) {
+        const states = {
+            'waiting': 'Waiting',
+            'betting': 'Betting',
+            'playing': 'Playing',
+            'dealer': 'Dealer Turn',
+            'finished': 'Round Ended'
+        };
+        return states[state] || state;
+    }
+
+    getTimeAgo(timestamp) {
+        const now = Date.now();
+        const diff = now - timestamp;
+        const minutes = Math.floor(diff / 60000);
+        const seconds = Math.floor((diff % 60000) / 1000);
+        
+        if (minutes > 0) {
+            return `${minutes}m ago`;
+        } else {
+            return `${seconds}s ago`;
         }
     }
 

@@ -212,6 +212,142 @@ body {
     border: 1px solid #f44336;
 }
 
+/* Public Tables Browser */
+.public-tables-browser {
+    background: rgba(0,0,0,0.3);
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+}
+
+.public-tables-browser h3 {
+    color: #ffd700;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.tables-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.action-btn.small {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+.tables-list {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 1rem;
+}
+
+.loading-tables {
+    text-align: center;
+    padding: 2rem;
+    color: #aaa;
+    font-style: italic;
+}
+
+.table-item {
+    background: rgba(255,255,255,0.1);
+    border: 2px solid #333;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 0.8rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.table-item:hover {
+    border-color: #ffd700;
+    background: rgba(255,255,255,0.15);
+}
+
+.table-item.full {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.table-item.full:hover {
+    border-color: #666;
+    background: rgba(255,255,255,0.1);
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.table-id {
+    font-family: monospace;
+    background: rgba(0,0,0,0.3);
+    padding: 0.2rem 0.5rem;
+    border-radius: 3px;
+    font-size: 0.8rem;
+}
+
+.table-status {
+    padding: 0.2rem 0.6rem;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.table-status.waiting {
+    background: rgba(0,255,0,0.3);
+    color: #00ff00;
+}
+
+.table-status.playing {
+    background: rgba(255,165,0,0.3);
+    color: #ffa500;
+}
+
+.table-status.betting {
+    background: rgba(0,150,255,0.3);
+    color: #0096ff;
+}
+
+.table-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #e0e0e0;
+    font-size: 0.9rem;
+}
+
+.table-players {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.player-count {
+    background: rgba(0,0,0,0.4);
+    padding: 0.2rem 0.5rem;
+    border-radius: 10px;
+}
+
+.table-round {
+    color: #aaa;
+}
+
+.no-tables {
+    text-align: center;
+    padding: 2rem;
+    color: #aaa;
+}
+
+.no-tables h4 {
+    color: #ffd700;
+    margin-bottom: 0.5rem;
+}
+
 /* Game Screen */
 .game-container {
     width: 100%;

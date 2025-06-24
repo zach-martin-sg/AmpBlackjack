@@ -219,6 +219,22 @@ class GameTable {
             maxPlayers: this.maxPlayers
         };
     }
+
+    getTableInfo() {
+        return {
+            id: this.id,
+            isPrivate: this.isPrivate,
+            playerCount: this.players.size,
+            maxPlayers: this.maxPlayers,
+            gameState: this.gameState,
+            round: this.round,
+            createdAt: this.createdAt,
+            players: Array.from(this.players.values()).map(player => ({
+                username: player.username,
+                status: player.status
+            }))
+        };
+    }
 }
 
 // Global state
@@ -234,6 +250,16 @@ function findPublicTable() {
         }
     }
     return null;
+}
+
+function getPublicTables() {
+    const publicTables = [];
+    for (let table of tables.values()) {
+        if (!table.isPrivate) {
+            publicTables.push(table.getTableInfo());
+        }
+    }
+    return publicTables.sort((a, b) => b.createdAt - a.createdAt); // Newest first
 }
 
 function createTable(isPrivate = false, hostId = null) {
@@ -259,6 +285,64 @@ io.on('connection', (socket) => {
             playerId: socket.id,
             player: players.get(socket.id)
         });
+    });
+
+    socket.on('get_public_tables', () => {
+        const publicTables = getPublicTables();
+        socket.emit('public_tables_list', publicTables);
+    });
+
+    socket.on('join_specific_table', (tableId) => {
+        const player = players.get(socket.id);
+        const table = tables.get(tableId);
+        
+        if (!player || !table || table.isPrivate) {
+            socket.emit('error', { message: 'Invalid table' });
+            return;
+        }
+
+        if (table.addPlayer(socket.id, player)) {
+            player.tableId = table.id;
+            socket.join(table.id);
+            
+            io.to(table.id).emit('player_joined', {
+                player: players.get(socket.id),
+                gameState: table.getGameState()
+            });
+
+            socket.emit('table_joined', {
+                tableId: table.id,
+                gameState: table.getGameState()
+            });
+
+            // Start game if enough players and waiting
+            if (table.players.size >= 1 && table.gameState === 'waiting') {
+                table.startNewRound();
+                io.to(table.id).emit('round_started', {
+                    gameState: table.getGameState()
+                });
+            }
+        } else {
+            socket.emit('error', { message: 'Table is full' });
+        }
+    });
+
+    socket.on('create_new_public_table', () => {
+        const player = players.get(socket.id);
+        if (!player) return;
+
+        const table = createTable(false);
+        table.addPlayer(socket.id, player);
+        player.tableId = table.id;
+        socket.join(table.id);
+
+        socket.emit('table_joined', {
+            tableId: table.id,
+            gameState: table.getGameState()
+        });
+
+        // Broadcast table list update to all lobby users
+        io.emit('public_tables_updated', getPublicTables());
     });
 
     socket.on('join_public_table', () => {

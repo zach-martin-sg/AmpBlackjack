@@ -36,9 +36,22 @@
                     <h2>Choose Game Mode</h2>
                     <div class="mode-buttons">
                         <button id="soloModeBtn" class="mode-btn">Solo Play</button>
-                        <button id="joinPublicBtn" class="mode-btn primary">Join Public Table</button>
+                        <button id="browsePublicBtn" class="mode-btn primary">Browse Public Tables</button>
                         <button id="createPrivateBtn" class="mode-btn">Create Private Table</button>
                     </div>
+                </div>
+                
+                <!-- Public Tables Browser -->
+                <div class="public-tables-browser" id="publicTablesBrowser" style="display: none;">
+                    <h3>Public Tables</h3>
+                    <div class="tables-header">
+                        <button id="refreshTablesBtn" class="action-btn small">Refresh</button>
+                        <button id="createNewTableBtn" class="action-btn primary small">Create New Table</button>
+                    </div>
+                    <div class="tables-list" id="tablesList">
+                        <div class="loading-tables">Loading tables...</div>
+                    </div>
+                    <button id="backToLobbyBtn" class="action-btn">Back to Lobby</button>
                 </div>
                 
                 <div class="private-table-section" id="privateTableSection" style="display: none;">
