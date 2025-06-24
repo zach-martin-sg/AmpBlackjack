@@ -204,6 +204,7 @@ class GameTable {
             isPrivate: this.isPrivate,
             gameState: this.gameState,
             round: this.round,
+            hostId: this.hostId,
             players: Array.from(this.players.values()).map(player => ({
                 ...player,
                 hand: player.hand,
@@ -315,13 +316,8 @@ io.on('connection', (socket) => {
                 gameState: table.getGameState()
             });
 
-            // Start game if enough players and waiting
-            if (table.players.size >= 1 && table.gameState === 'waiting') {
-                table.startNewRound();
-                io.to(table.id).emit('round_started', {
-                    gameState: table.getGameState()
-                });
-            }
+            // Don't auto-start, let host decide when to start
+            // (Remove auto-start logic for multiplayer)
         } else {
             socket.emit('error', { message: 'Table is full' });
         }
@@ -331,7 +327,7 @@ io.on('connection', (socket) => {
         const player = players.get(socket.id);
         if (!player) return;
 
-        const table = createTable(false);
+        const table = createTable(false, socket.id); // Set creator as host
         table.addPlayer(socket.id, player);
         player.tableId = table.id;
         socket.join(table.id);
@@ -343,6 +339,29 @@ io.on('connection', (socket) => {
 
         // Broadcast table list update to all lobby users
         io.emit('public_tables_updated', getPublicTables());
+    });
+
+    socket.on('host_start_game', () => {
+        const player = players.get(socket.id);
+        if (!player || !player.tableId) return;
+
+        const table = tables.get(player.tableId);
+        if (!table || table.hostId !== socket.id) {
+            socket.emit('error', { message: 'Only the host can start the game' });
+            return;
+        }
+
+        if (table.players.size < 2) {
+            socket.emit('error', { message: 'Need at least 2 players to start' });
+            return;
+        }
+
+        if (table.gameState === 'waiting') {
+            table.startNewRound();
+            io.to(table.id).emit('round_started', {
+                gameState: table.getGameState()
+            });
+        }
     });
 
     socket.on('join_public_table', () => {

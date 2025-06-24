@@ -64,6 +64,9 @@ class MultiplayerBlackjackGame {
                 this.sendChatMessage(message);
             });
         });
+
+        // Host controls
+        document.getElementById('hostStartBtn').addEventListener('click', () => this.hostStartGame());
     }
 
     showScreen(screenId) {
@@ -376,6 +379,12 @@ class MultiplayerBlackjackGame {
         }
     }
 
+    hostStartGame() {
+        if (this.socket && this.socket.connected) {
+            this.socket.emit('host_start_game');
+        }
+    }
+
     addChatMessage(username, message) {
         const chatMessages = document.getElementById('chatMessages');
         const messageDiv = document.createElement('div');
@@ -423,6 +432,33 @@ class MultiplayerBlackjackGame {
         if (myPlayer) {
             document.getElementById('bankrollAmount').textContent = myPlayer.bankroll;
             document.getElementById('betAmount').textContent = myPlayer.currentBet || 0;
+        }
+
+        // Update host controls
+        this.updateHostControls();
+    }
+
+    updateHostControls() {
+        const isHost = this.gameState && this.gameState.hostId === this.playerData.id;
+        
+        if (isHost && this.gameState.gameState === 'waiting') {
+            const playerCount = this.gameState.playerCount;
+            const hostStatus = document.querySelector('.host-status');
+            const hostStartBtn = document.getElementById('hostStartBtn');
+            
+            if (playerCount >= 2) {
+                hostStatus.textContent = `${playerCount} players ready. Start when ready!`;
+                hostStartBtn.disabled = false;
+            } else {
+                hostStatus.textContent = 'Waiting for more players to join...';
+                hostStartBtn.disabled = true;
+            }
+            
+            this.showControls('hostControls');
+        } else if (!isHost && this.gameState && this.gameState.gameState === 'waiting') {
+            // Show waiting message for non-hosts
+            this.showMessage('Waiting for host to start the game...');
+            this.showControls('none');
         }
     }
 
@@ -560,7 +596,7 @@ class MultiplayerBlackjackGame {
     }
 
     showControls(controlsId) {
-        const controls = ['bettingControls', 'gameControls', 'nextHandControls'];
+        const controls = ['bettingControls', 'gameControls', 'nextHandControls', 'hostControls'];
         controls.forEach(id => {
             const element = document.getElementById(id);
             element.style.display = id === controlsId ? 'flex' : 'none';
