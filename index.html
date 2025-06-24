@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Blackjack</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Title Screen -->
+    <div id="titleScreen" class="screen active">
+        <div class="title-container">
+            <h1 class="game-title">Quick Blackjack</h1>
+            <div class="bankroll-selection">
+                <h2>Choose Your Starting Funds</h2>
+                <div class="bankroll-buttons">
+                    <button class="bankroll-btn" data-amount="100">$100</button>
+                    <button class="bankroll-btn" data-amount="500">$500</button>
+                    <button class="bankroll-btn" data-amount="1000">$1000</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="gameScreen" class="screen">
+        <div class="game-container">
+            <!-- Game Info Bar -->
+            <div class="info-bar">
+                <div class="bankroll-display">
+                    <span>Bankroll: $<span id="bankrollAmount">100</span></span>
+                </div>
+                <div class="bet-display">
+                    <span>Bet: $<span id="betAmount">10</span></span>
+                </div>
+                <button id="menuBtn" class="menu-btn">Menu</button>
+            </div>
+
+            <!-- Game Table -->
+            <div class="game-table">
+                <!-- Dealer Area -->
+                <div class="dealer-area">
+                    <div class="dealer-label">Dealer</div>
+                    <div class="dealer-score" id="dealerScore">0</div>
+                    <div class="dealer-cards" id="dealerCards"></div>
+                </div>
+
+                <!-- Center Area -->
+                <div class="center-area">
+                    <div class="deck" id="deck"></div>
+                    <div class="game-message" id="gameMessage">Place your bet to start</div>
+                </div>
+
+                <!-- Player Area -->
+                <div class="player-area">
+                    <div class="player-label">Player</div>
+                    <div class="player-score" id="playerScore">0</div>
+                    <div class="player-cards" id="playerCards"></div>
+                </div>
+            </div>
+
+            <!-- Betting Controls -->
+            <div class="betting-controls" id="bettingControls">
+                <div class="bet-options">
+                    <button class="bet-btn" data-bet="10">$10</button>
+                    <button class="bet-btn" data-bet="25">$25</button>
+                    <button class="bet-btn" data-bet="50">$50</button>
+                    <button class="bet-btn" data-bet="100">$100</button>
+                </div>
+                <button id="dealBtn" class="action-btn primary">Deal</button>
+            </div>
+
+            <!-- Game Controls -->
+            <div class="game-controls" id="gameControls" style="display: none;">
+                <button id="hitBtn" class="action-btn">Hit</button>
+                <button id="standBtn" class="action-btn">Stand</button>
+            </div>
+
+            <!-- Next Hand Button -->
+            <div class="next-hand-controls" id="nextHandControls" style="display: none;">
+                <button id="nextHandBtn" class="action-btn primary">Next Hand</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="gameOverScreen" class="screen">
+        <div class="game-over-container">
+            <h1 class="game-over-title">You Lose!</h1>
+            <p class="game-over-message">You've run out of money!</p>
+            <button id="returnToMenuBtn" class="action-btn primary">Return to Main Menu</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
