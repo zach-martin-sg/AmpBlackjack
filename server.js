@@ -49,9 +49,10 @@ class GameTable {
             currentBet: 0,
             hand: [],
             score: 0,
-            status: 'waiting', // waiting, betting, playing, finished
+            status: 'waiting', // waiting, betting, playing, stand, bust, finished
             isReady: false,
-            joinedAt: Date.now()
+            joinedAt: Date.now(),
+            turnOrder: this.players.size // Order based on join sequence
         });
         
         return true;
@@ -173,29 +174,35 @@ class GameTable {
     }
 
     getCurrentPlayer() {
-        const playerIds = Array.from(this.players.keys());
-        if (this.currentPlayerIndex < playerIds.length) {
-            return this.players.get(playerIds[this.currentPlayerIndex]);
+        // Get players sorted by turn order
+        const sortedPlayers = Array.from(this.players.values()).sort((a, b) => a.turnOrder - b.turnOrder);
+        
+        // Find the first player who is still in 'playing' status
+        for (let player of sortedPlayers) {
+            if (player.status === 'playing') {
+                return player;
+            }
         }
         return null;
     }
 
     nextPlayer() {
-        this.currentPlayerIndex++;
-        const playerIds = Array.from(this.players.keys());
-        
-        // Skip players who are finished
-        while (this.currentPlayerIndex < playerIds.length) {
-            const player = this.players.get(playerIds[this.currentPlayerIndex]);
-            if (player.status === 'playing') {
-                return player;
-            }
-            this.currentPlayerIndex++;
+        const currentPlayer = this.getCurrentPlayer();
+        if (!currentPlayer) {
+            // No more players to play, start dealer
+            this.gameState = 'dealer';
+            return null;
         }
-        
-        // All players finished, start dealer play
-        this.gameState = 'dealer';
-        return null;
+        return currentPlayer;
+    }
+
+    allPlayersFinished() {
+        for (let player of this.players.values()) {
+            if (player.status === 'playing') {
+                return false;
+            }
+        }
+        return true;
     }
 
     getGameState() {
@@ -476,7 +483,10 @@ io.on('connection', (socket) => {
         const table = tables.get(player.tableId);
         const currentPlayer = table.getCurrentPlayer();
         
-        if (!currentPlayer || currentPlayer.id !== socket.id) return;
+        if (!currentPlayer || currentPlayer.id !== socket.id) {
+            socket.emit('error', { message: 'Not your turn!' });
+            return;
+        }
 
         if (action === 'hit') {
             currentPlayer.hand.push(table.deck.pop());
@@ -484,11 +494,9 @@ io.on('connection', (socket) => {
             
             if (currentPlayer.score > 21) {
                 currentPlayer.status = 'bust';
-                table.nextPlayer();
             }
         } else if (action === 'stand') {
             currentPlayer.status = 'stand';
-            table.nextPlayer();
         }
 
         io.to(table.id).emit('player_action_taken', {
@@ -497,8 +505,10 @@ io.on('connection', (socket) => {
             gameState: table.getGameState()
         });
 
-        // Check if all players finished
-        if (table.gameState === 'dealer') {
+        // Check if all players finished their turns
+        if (table.allPlayersFinished()) {
+            table.gameState = 'dealer';
+            
             // Dealer plays
             setTimeout(() => {
                 table.dealer.score = table.calculateHandValue(table.dealer.hand);

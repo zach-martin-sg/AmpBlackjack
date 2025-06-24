@@ -351,10 +351,9 @@ body {
 /* Game Screen */
 .game-container {
     width: 100%;
-    height: 100vh; /* Full viewport height */
+    height: 100%;
     display: flex;
     flex-direction: column;
-    overflow-y: auto; /* Allow scrolling if needed */
 }
 
 .info-bar {
@@ -486,22 +485,82 @@ body {
     color: #888;
 }
 
+/* Multiplayer Cards Area */
+.multiplayer-cards-area {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.all-players-cards {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    max-width: 100%;
+}
+
+.multiplayer-player-hand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 120px;
+}
+
+.multiplayer-player-info {
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.multiplayer-player-name {
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: #ffd700;
+    margin-bottom: 0.2rem;
+}
+
+.multiplayer-player-score {
+    font-size: 0.8rem;
+    color: #e0e0e0;
+    background: rgba(0,0,0,0.4);
+    padding: 0.2rem 0.5rem;
+    border-radius: 10px;
+}
+
+.multiplayer-player-cards {
+    display: flex;
+    gap: -5px;
+    min-height: 100px;
+    align-items: center;
+    justify-content: center;
+}
+
+.multiplayer-player-hand.current-turn {
+    background: rgba(255,215,0,0.2);
+    border: 2px solid #ffd700;
+    border-radius: 10px;
+    padding: 0.8rem;
+}
+
+.multiplayer-player-hand.finished {
+    opacity: 0.7;
+}
+
 /* Game Table */
 .game-table {
-    height: 400px; /* Fixed height instead of flex: 1 */
-    width: 600px; /* Fixed width */
-    max-width: 90vw; /* Responsive max width */
+    flex: 1;
     position: relative;
     background: radial-gradient(ellipse at center, #2d5a3d, #1a4a2e);
-    border: 6px solid #8b4513; /* Thinner border */
+    border: 8px solid #8b4513;
     border-radius: 50%;
-    margin: 0.5rem auto; /* Center and reduce margin */
+    margin: 1rem 2rem;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    padding: 1rem; /* Reduced padding */
-    box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+    padding: 2rem;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
 }
 
 /* Dealer Area */
@@ -608,17 +667,17 @@ body {
 
 /* Playing Cards */
 .card {
-    width: 60px; /* Smaller cards */
-    height: 85px; /* Smaller cards */
+    width: 70px;
+    height: 100px;
     background: white;
     border: 2px solid #333;
-    border-radius: 6px;
+    border-radius: 8px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     margin: 0 -5px;
-    font-size: 0.8rem; /* Smaller font */
+    font-size: 0.9rem;
     font-weight: bold;
     color: #333;
     position: relative;

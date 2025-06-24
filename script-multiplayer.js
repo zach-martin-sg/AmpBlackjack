@@ -402,11 +402,15 @@ class MultiplayerBlackjackGame {
             document.getElementById('chatSystem').style.display = 'block';
             document.getElementById('gameModeIndicator').textContent = 'Multiplayer';
             document.getElementById('gameModeIndicator').classList.add('multiplayer');
+            document.getElementById('multiplayerCardsArea').style.display = 'block';
+            document.getElementById('soloPlayerArea').style.display = 'none';
         } else {
             document.getElementById('playersPanel').style.display = 'none';
             document.getElementById('chatSystem').style.display = 'none';
             document.getElementById('gameModeIndicator').textContent = 'Solo';
             document.getElementById('gameModeIndicator').classList.remove('multiplayer');
+            document.getElementById('multiplayerCardsArea').style.display = 'none';
+            document.getElementById('soloPlayerArea').style.display = 'block';
         }
     }
 
@@ -423,6 +427,15 @@ class MultiplayerBlackjackGame {
         const currentPlayer = this.gameState.players.find(p => p.id === this.gameState.currentPlayer);
         if (currentPlayer) {
             document.getElementById('turnIndicator').textContent = `${currentPlayer.username}'s turn`;
+            
+            // Show/hide game controls based on whose turn it is
+            if (currentPlayer.id === this.playerData.id && this.gameState.gameState === 'playing') {
+                this.showControls('gameControls');
+                this.showMessage('Your turn! Hit or Stand?');
+            } else if (this.gameState.gameState === 'playing') {
+                this.showControls('none');
+                this.showMessage(`Waiting for ${currentPlayer.username} to play...`);
+            }
         } else {
             document.getElementById('turnIndicator').textContent = '';
         }
@@ -503,32 +516,19 @@ class MultiplayerBlackjackGame {
         if (this.gameMode === 'solo' && this.soloGame) {
             this.soloGame.updateDisplay();
         } else if (this.gameMode === 'multiplayer' && this.gameState) {
-            this.updateMultiplayerCards();
-            this.updateMultiplayerScores();
+            this.updateMultiplayerDisplay();
         }
     }
 
-    updateMultiplayerCards() {
-        const playerCards = document.getElementById('playerCards');
+    updateMultiplayerDisplay() {
+        this.updateDealerCards();
+        this.updateAllPlayersCards();
+    }
+
+    updateDealerCards() {
         const dealerCards = document.getElementById('dealerCards');
-        
-        // Clear existing cards
-        playerCards.innerHTML = '';
         dealerCards.innerHTML = '';
         
-        // Find current player's hand
-        const myPlayer = this.gameState.players.find(p => p.id === this.playerData.id);
-        if (myPlayer && myPlayer.hand) {
-            myPlayer.hand.forEach((card, index) => {
-                setTimeout(() => {
-                    const cardElement = this.createCardElement(card);
-                    cardElement.classList.add('dealing');
-                    playerCards.appendChild(cardElement);
-                }, index * 200);
-            });
-        }
-        
-        // Add dealer cards
         if (this.gameState.dealer && this.gameState.dealer.hand) {
             this.gameState.dealer.hand.forEach((card, index) => {
                 setTimeout(() => {
@@ -538,20 +538,71 @@ class MultiplayerBlackjackGame {
                 }, index * 200);
             });
         }
-    }
-
-    updateMultiplayerScores() {
-        const playerScore = document.getElementById('playerScore');
+        
+        // Update dealer score
         const dealerScore = document.getElementById('dealerScore');
-        
-        const myPlayer = this.gameState.players.find(p => p.id === this.playerData.id);
-        if (myPlayer) {
-            playerScore.textContent = myPlayer.score || 0;
-        }
-        
         if (this.gameState.dealer) {
             dealerScore.textContent = this.gameState.dealer.score || 0;
         }
+    }
+
+    updateAllPlayersCards() {
+        const allPlayersCards = document.getElementById('allPlayersCards');
+        allPlayersCards.innerHTML = '';
+        
+        if (!this.gameState || !this.gameState.players) return;
+        
+        // Sort players by turn order
+        const sortedPlayers = [...this.gameState.players].sort((a, b) => a.turnOrder - b.turnOrder);
+        
+        sortedPlayers.forEach(player => {
+            const playerHandDiv = document.createElement('div');
+            playerHandDiv.className = 'multiplayer-player-hand';
+            
+            if (player.id === this.gameState.currentPlayer) {
+                playerHandDiv.classList.add('current-turn');
+            }
+            
+            if (player.status === 'bust' || player.status === 'stand' || player.status === 'finished') {
+                playerHandDiv.classList.add('finished');
+            }
+            
+            // Player info
+            const playerInfo = document.createElement('div');
+            playerInfo.className = 'multiplayer-player-info';
+            playerInfo.innerHTML = `
+                <div class="multiplayer-player-name">${player.username}${player.id === this.playerData.id ? ' (You)' : ''}</div>
+                <div class="multiplayer-player-score">Score: ${player.score || 0}</div>
+            `;
+            
+            // Player cards
+            const playerCardsDiv = document.createElement('div');
+            playerCardsDiv.className = 'multiplayer-player-cards';
+            
+            if (player.hand && player.hand.length > 0) {
+                player.hand.forEach((card, index) => {
+                    setTimeout(() => {
+                        const cardElement = this.createCardElement(card);
+                        cardElement.classList.add('dealing');
+                        playerCardsDiv.appendChild(cardElement);
+                    }, index * 100);
+                });
+            }
+            
+            playerHandDiv.appendChild(playerInfo);
+            playerHandDiv.appendChild(playerCardsDiv);
+            allPlayersCards.appendChild(playerHandDiv);
+        });
+    }
+
+    updateMultiplayerCards() {
+        // Legacy function - now handled by updateMultiplayerDisplay
+        this.updateMultiplayerDisplay();
+    }
+
+    updateMultiplayerScores() {
+        // Legacy function - now handled by updateAllPlayersCards
+        // Scores are updated within updateAllPlayersCards
     }
 
     createCardElement(card, hidden = false) {
