@@ -78,6 +78,13 @@ class MultiplayerBlackjackGame {
     connectToServer() {
         if (this.socket) return;
 
+        // Check if Socket.IO is available
+        if (typeof io === 'undefined') {
+            this.updateConnectionStatus('Server not running - Solo mode only', false);
+            console.warn('Socket.IO not available. Start the Node.js server for multiplayer features.');
+            return;
+        }
+
         this.socket = io();
         
         this.socket.on('connect', () => {
@@ -89,6 +96,11 @@ class MultiplayerBlackjackGame {
         this.socket.on('disconnect', () => {
             console.log('Disconnected from server');
             this.updateConnectionStatus('Disconnected', false);
+        });
+
+        this.socket.on('connect_error', () => {
+            console.log('Connection failed');
+            this.updateConnectionStatus('Connection failed - Check server', false);
         });
 
         this.socket.on('lobby_joined', (data) => {
@@ -179,16 +191,20 @@ class MultiplayerBlackjackGame {
     }
 
     joinPublicTable() {
-        if (this.socket) {
+        if (this.socket && this.socket.connected) {
             this.socket.emit('join_public_table');
+        } else {
+            alert('Please make sure the multiplayer server is running!\n\nTo start the server:\n1. Install Node.js\n2. Run: npm install\n3. Run: npm start\n4. Open http://localhost:3000');
         }
     }
 
     createPrivateTable() {
-        if (this.socket) {
-            this.socket.emit('create_private_table');
-        }
         document.getElementById('privateTableSection').style.display = 'block';
+        if (this.socket && this.socket.connected) {
+            this.socket.emit('create_private_table');
+        } else {
+            alert('Please make sure the multiplayer server is running!\n\nRun: npm start');
+        }
     }
 
     joinPrivateTable() {
