@@ -22,18 +22,75 @@
         </div>
     </div>
 
+    <!-- Lobby Screen -->
+    <div id="lobbyScreen" class="screen">
+        <div class="lobby-container">
+            <h1 class="lobby-title">Multiplayer Lobby</h1>
+            <div class="player-info">
+                <span>Welcome, <span id="playerUsername">Player</span>!</span>
+                <span>Bankroll: $<span id="playerBankroll">100</span></span>
+            </div>
+            
+            <div class="lobby-options">
+                <div class="game-mode-selection">
+                    <h2>Choose Game Mode</h2>
+                    <div class="mode-buttons">
+                        <button id="soloModeBtn" class="mode-btn">Solo Play</button>
+                        <button id="joinPublicBtn" class="mode-btn primary">Join Public Table</button>
+                        <button id="createPrivateBtn" class="mode-btn">Create Private Table</button>
+                    </div>
+                </div>
+                
+                <div class="private-table-section" id="privateTableSection" style="display: none;">
+                    <h3>Private Table</h3>
+                    <div class="private-controls">
+                        <input type="text" id="inviteCodeInput" placeholder="Enter invite code" maxlength="36">
+                        <button id="joinPrivateBtn" class="action-btn">Join Private Table</button>
+                    </div>
+                    <div id="inviteCodeDisplay" style="display: none;">
+                        <p>Share this code with friends:</p>
+                        <div class="invite-code">
+                            <input type="text" id="generatedInviteCode" readonly>
+                            <button id="copyInviteBtn" class="copy-btn">Copy</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="connection-status">
+                <span id="connectionStatus">Connecting...</span>
+            </div>
+        </div>
+    </div>
+
     <!-- Game Screen -->
     <div id="gameScreen" class="screen">
         <div class="game-container">
             <!-- Game Info Bar -->
             <div class="info-bar">
-                <div class="bankroll-display">
-                    <span>Bankroll: $<span id="bankrollAmount">100</span></span>
+                <div class="game-info-left">
+                    <div class="bankroll-display">
+                        <span>Bankroll: $<span id="bankrollAmount">100</span></span>
+                    </div>
+                    <div class="bet-display">
+                        <span>Bet: $<span id="betAmount">10</span></span>
+                    </div>
+                    <div class="game-mode-indicator" id="gameModeIndicator">Solo</div>
                 </div>
-                <div class="bet-display">
-                    <span>Bet: $<span id="betAmount">10</span></span>
+                <div class="game-info-center">
+                    <div class="round-info" id="roundInfo">Round 1</div>
+                    <div class="turn-indicator" id="turnIndicator"></div>
                 </div>
-                <button id="menuBtn" class="menu-btn">Menu</button>
+                <div class="game-info-right">
+                    <button id="menuBtn" class="menu-btn">Menu</button>
+                </div>
+            </div>
+
+            <!-- Multiplayer Players Panel -->
+            <div class="players-panel" id="playersPanel" style="display: none;">
+                <div class="players-list" id="playersList">
+                    <!-- Players will be populated here -->
+                </div>
             </div>
 
             <!-- Game Table -->
@@ -80,6 +137,19 @@
             <div class="next-hand-controls" id="nextHandControls" style="display: none;">
                 <button id="nextHandBtn" class="action-btn primary">Next Hand</button>
             </div>
+
+            <!-- Chat System -->
+            <div class="chat-system" id="chatSystem" style="display: none;">
+                <div class="chat-messages" id="chatMessages"></div>
+                <div class="chat-controls">
+                    <div class="quick-chat">
+                        <button class="chat-btn" data-message="Nice hand!">👍</button>
+                        <button class="chat-btn" data-message="Good luck!">🍀</button>
+                        <button class="chat-btn" data-message="Well played!">👏</button>
+                        <button class="chat-btn" data-message="Bad luck!">😬</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -92,6 +162,7 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="script-multiplayer.js"></script>
 </body>
 </html>

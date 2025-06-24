@@ -1,0 +1,22 @@
+{
+  "name": "quick-blackjack-multiplayer",
+  "version": "1.0.0",
+  "description": "Multiplayer Blackjack game with WebSocket support",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "client": "python3 -m http.server 8000"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": ["blackjack", "multiplayer", "websocket", "game"],
+  "author": "Zach Martin",
+  "license": "MIT"
+}
