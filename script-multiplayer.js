@@ -629,11 +629,30 @@ class MultiplayerBlackjackGame {
     }
 
     updateCardDisplay(cardElement, card) {
+        const suitSymbol = this.getSuitSymbol(card.suit);
         cardElement.innerHTML = `
-            <div style="font-size: 0.7rem; align-self: flex-start; margin: 2px;">${card.rank}</div>
-            <div style="font-size: 1.5rem;">${card.suit}</div>
-            <div style="font-size: 0.7rem; align-self: flex-end; margin: 2px; transform: rotate(180deg);">${card.rank}</div>
+            <div class="card-corner top-left">
+                <div class="card-rank">${card.rank}</div>
+                <div class="card-suit">${suitSymbol}</div>
+            </div>
+            <div class="card-center">
+                <div class="card-main-suit">${suitSymbol}</div>
+            </div>
+            <div class="card-corner bottom-right">
+                <div class="card-rank">${card.rank}</div>
+                <div class="card-suit">${suitSymbol}</div>
+            </div>
         `;
+    }
+
+    getSuitSymbol(suit) {
+        const suits = {
+            '♠': '♠',
+            '♥': '♥', 
+            '♦': '♦',
+            '♣': '♣'
+        };
+        return suits[suit] || suit;
     }
 
     showResults(results) {

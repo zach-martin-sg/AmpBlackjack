@@ -551,9 +551,9 @@ body {
 
 /* Game Table */
 .game-table {
-    height: 50vh; /* Fixed height to ensure space for controls */
-    max-height: 500px;
-    min-height: 350px;
+    height: 45vh; /* Slightly smaller to ensure space for controls */
+    max-height: 450px;
+    min-height: 300px;
     position: relative;
     background: radial-gradient(ellipse at center, #2d5a3d, #1a4a2e);
     border: 8px solid #8b4513;
@@ -563,7 +563,7 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    padding: 1.5rem;
+    padding: 1rem;
     box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
 }
 
@@ -629,14 +629,18 @@ body {
 }
 
 .game-message {
-    font-size: 1.3rem;
+    font-size: 1.1rem;
     font-weight: bold;
     color: #ffd700;
     text-align: center;
-    padding: 1rem;
+    padding: 0.8rem;
     background: rgba(0,0,0,0.4);
     border-radius: 10px;
     min-width: 250px;
+    max-width: 400px;
+    margin: 0.5rem 0;
+    z-index: 10;
+    position: relative;
 }
 
 /* Player Area */
@@ -690,18 +694,84 @@ body {
     z-index: 1;
 }
 
+.card-corner {
+    position: absolute;
+    font-size: 0.6rem;
+    line-height: 1;
+    font-weight: bold;
+}
+
+.card-corner.top-left {
+    top: 3px;
+    left: 3px;
+    text-align: left;
+}
+
+.card-corner.bottom-right {
+    bottom: 3px;
+    right: 3px;
+    transform: rotate(180deg);
+    text-align: left;
+}
+
+.card-rank {
+    font-size: 0.7rem;
+    font-weight: bold;
+}
+
+.card-suit {
+    font-size: 0.6rem;
+    margin-top: 1px;
+}
+
+.card-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.card-main-suit {
+    font-size: 2rem;
+    font-weight: normal;
+}
+
 .card.red {
     color: #d32f2f;
 }
 
 .card.hidden {
-    background: linear-gradient(145deg, #1a1a1a, #333);
+    background: linear-gradient(145deg, #8B0000, #4B0000);
     color: #ffd700;
+    border: 2px solid #ffd700;
+    position: relative;
+    overflow: hidden;
 }
 
 .card.hidden::before {
-    content: '?';
-    font-size: 2rem;
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        linear-gradient(45deg, transparent 46%, #ffd700 46%, #ffd700 54%, transparent 54%),
+        linear-gradient(-45deg, transparent 46%, #ffd700 46%, #ffd700 54%, transparent 54%);
+    background-size: 15px 15px;
+    background-position: 0 0, 7.5px 7.5px;
+    opacity: 0.3;
+}
+
+.card.hidden::after {
+    content: '🂠';
+    font-size: 2.5rem;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #ffd700;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
 }
 
 .card:hover {
@@ -715,9 +785,11 @@ body {
     gap: 1rem;
     align-items: center;
     justify-content: center;
-    padding: 0.8rem 1rem; /* Reduced padding */
-    background: rgba(0,0,0,0.3);
-    min-height: 60px; /* Ensure consistent height */
+    padding: 1rem;
+    background: rgba(0,0,0,0.4);
+    min-height: 70px;
+    margin-top: 1rem; /* Add space above controls */
+    border-top: 2px solid rgba(255,215,0,0.3);
 }
 
 .host-controls {
